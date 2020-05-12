@@ -1,26 +1,45 @@
+#!/bin/bash
+runTest=0
 
-
-mainFolder="$1"
-
-## ONLY FOR TESTING PURPOSES
-
-mkdir "./$mainFolder"
-
-for i in $(seq 1 50);
-do
-  thisIsATest="name name${i}_$RANDOM"
-  mkdir "./$mainFolder/$thisIsATest"
-  touch "./$mainFolder/$thisIsATest/test.txt"
+while getopts "tf:" arg; do
+  case $arg in
+    t) runTest=1;;
+    f) folder=$OPTARG;;
+  esac
 done
 
-echo Beginning cleanup of folder: "$mainFolder"!
+createTestFolder () {
+  echo "Creating test folder..."
+  testFolder="testingFolder"
+  rm -rf "./$testFolder"
+  mkdir "./$testFolder"
 
-## 1. Go to folder
-## 2. Change 'testdir' to the folder name that contains all subfolders with files
-## 3. Run this script: sh plloScript.sh
-for fileDir in ./"$mainFolder"/* ; do  
-  newFileDir=${fileDir%_*}
-  echo Old folder name: $fileDir
-  echo New folder name $newFileDir
-  mv "$fileDir" "$newFileDir"
-done;
+  for i in $(seq 1 50);
+  do
+    thisIsATest="name name${i}_$RANDOM"
+    mkdir "./$testFolder/$thisIsATest"
+    touch "./$testFolder/$thisIsATest/test.txt"
+  done
+}
+
+startCleanup () {
+  cleanupFolder=$1
+  echo "Beginning cleanup of folder: "$cleanupFolder"!"
+
+  for fileDir in ./"$cleanupFolder"/* ; do  
+    newFileDir=${fileDir%_*}
+    echo Old folder name: $fileDir
+    echo New folder name $newFileDir
+    mv "$fileDir" "$newFileDir"
+  done;
+}
+
+if [ $runTest -eq 1 ]
+then
+  createTestFolder
+  startCleanup "testingFolder"
+else
+  startCleanup $folder
+fi
+
+
